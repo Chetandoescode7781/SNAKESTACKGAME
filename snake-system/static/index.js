@@ -1,6 +1,8 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
+ canvas.width = window.innerHeight * 0.8;
+ canvas.height = window.innerHeight * 0.8;  
 const cw = 10; 
 const w = canvas.width;
 const h = canvas.height;
@@ -87,8 +89,7 @@ document.addEventListener("keydown", (e) => {
 
    
     if (key === "p" && (gameOver || !requestId)) {
-        if (gameOver) restartGame();
-        else animate();
+       play();
     }
 
    
@@ -96,6 +97,12 @@ document.addEventListener("keydown", (e) => {
         if (!isPaused) {
             stopanimation();
             isPaused = true;
+            ctx.fillStyle = "yellow";
+            ctx.font = "30px Arial";
+            ctx.textAlign = "center";
+           ctx.fillText("PAUSED ", w / 2, h / 2);
+           ctx.fillText("Press Space to Resume", w / 2, h / 2 + 40);
+
         } else {
             isPaused = false;
             animate();
@@ -107,7 +114,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 
-let fps = 10; // Control speed
+let fps = 8; // Control speed
 let now;
 let then = Date.now();
 let interval = 1000 / fps;
@@ -162,7 +169,7 @@ function checkCollisions() {
 function foodCollisionCheck() {
     let head = snakeInstance.array[0];
     if (head.x === foodInstance.x && head.y === foodInstance.y) {
-        score++; [cite: 52]
+        score++; 
         foodInstance.reset();
         
     } else {
@@ -179,13 +186,12 @@ function endGame(cause) {
     ctx.textAlign = "center";
     ctx.fillText("GAME OVER (" + cause + ")", w / 2, h / 2);
     ctx.fillText("Score: " + score, w / 2, h / 2 + 40);
-
+    ctx.fillText("Press 'R' to Restart", w / 2, h / 2 + 80);
     sendScore(cause);
 }
 
 function restartGame() {
     stopanimation();
-    if (!playerName) playerName = prompt("Enter Username:") || "Player1"; [cite: 37]
     gameOver = false;
     isPaused = false;
     score = 0;
@@ -195,26 +201,22 @@ function restartGame() {
     animate();
 }
 
-
-function sendScore(cause) {
-    const payload = {
-        name: playerName,
-        score: score,
-        cause: cause,
-        duration: 0 
-    };
-
-   
-    fetch("/save_score", {
-        method: "POST", [cite: 56]
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload) [cite: 56]
-    })
-    .then(response => response.json())
-    .then(data => console.log("Success:", data))
-    .catch(error => console.error("Error:", error));
+function play(){
+      snakeInstance.create();
+      restartGame();  
 }
 
+function startingScreen() {
+    ctx.fillStyle = "green";
+    ctx.font = "30px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("Press 'P' to Start", w / 2, h / 2);
+}
+ 
+startingScreen();
 
-snakeInstance.create();
-restartGame();
+function startGame() {
+    document.getElementById("rule_container").style.display = "none";
+    document.getElementById("game-container").style.display = "block";
+    play();
+}
