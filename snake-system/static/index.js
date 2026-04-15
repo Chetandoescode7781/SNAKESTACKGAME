@@ -267,3 +267,23 @@ function startGame() {
     document.getElementById("time_container").style.display="block";
     play();
 }
+
+function sendScore(cause) {
+    fetch("http://127.0.0.1:5000/score", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            player: playerName || "Anonymous",
+            score: score,
+            cause: cause,
+            time: new Date().toLocaleString()
+        })
+    })
+    .then(res => res.json())
+    .then(data => console.log("Saved:", data))
+    .catch(err => console.error("Error:", err));
+}
+
+
