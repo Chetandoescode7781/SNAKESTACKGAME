@@ -1,8 +1,11 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-
+const gameContainer = document.getElementById("game-container");
+ 
  canvas.width = window.innerHeight * 0.8;
  canvas.height = window.innerHeight * 0.8;  
+ gameContainer.style.width = canvas.width + "px";
+ gameContainer.style.height = canvas.height + "px";
 const cw = 10; 
 const w = canvas.width;
 const h = canvas.height;
@@ -12,6 +15,8 @@ let d = "right";
 let requestId;
 let gameOver = false;
 let isPaused = false;
+let isimmune=false;
+let immuneCounter=0;
 let playerName = "";
 
 canvas.style.backgroundColor = "#000";
@@ -69,14 +74,14 @@ class Food {
         this.y = Math.floor(Math.random() * (h / cw));
     }
 
-    draw() {
-        paint_cell(this.x, this.y, "orange");
+    draw(color = "orange") {
+        paint_cell(this.x, this.y, color);
     }
 }
 
 const snakeInstance = new Snake();
 const foodInstance = new Food();
-
+const immunefood = new Food();
 
 document.addEventListener("keydown", (e) => {
     const key = e.key.toLowerCase();
@@ -134,11 +139,21 @@ function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         snakeInstance.move();
         
-        if (checkCollisions()) return;
-        
-        foodCollisionCheck();
+      if (isimmune) {
+              immuneCounter--;
+              if (immuneCounter <= 0) {
+               isimmune = false;
+               }
+              }
+         checkCollisions(); 
+       if(score > 0 && score % 3 == 0){immuneCollisionCheck();}
+       else foodCollisionCheck();
         snakeInstance.draw();
-        foodInstance.draw();
+       if(score > 0 && score % 3 == 0){immunefood.draw("blue");}
+       else  foodInstance.draw();
+
+       document.getElementById("score").textContent = score;
+ 
     }
 }
 
@@ -149,12 +164,25 @@ function stopanimation() {
 
 function checkCollisions() {
     let head = snakeInstance.array[0];
-
-   
-    if (head.x < 0 || head.x >= w / cw || head.y < 0 || head.y >= h / cw) {
+     
+    if(isimmune){
+    if (head.x < 0) {
+       head.x = (w / cw) - 1;
+       }
+     else if (head.x >= w / cw) {
+         head.x = 0;   
+    }
+     if (head.y < 0) {
+        head.y = (h / cw) - 1;
+         }
+          else if (head.y >= h / cw) {
+         head.y = 0;
+        }
+    }
+     else {if (head.x < 0 || head.x >= w / cw || head.y < 0 || head.y >= h / cw) {
         endGame("WALL");
         return true;
-    }
+        }
 
      
     for (let i = 1; i < snakeInstance.array.length; i++) {
@@ -162,8 +190,8 @@ function checkCollisions() {
             endGame("SELF");
             return true;
         }
-    }
-    return false;
+    }}
+  
 }
 
 function foodCollisionCheck() {
@@ -176,6 +204,21 @@ function foodCollisionCheck() {
         snakeInstance.array.pop();
     }
 }
+
+function immuneCollisionCheck() {
+    let head = snakeInstance.array[0];
+    if (head.x === immunefood.x && head.y === immunefood.y) {
+        score++; 
+        isimmune = true;
+        immuneCounter = 10 * fps; 
+        foodInstance.reset();
+        immunefood.reset();
+
+         } else {
+        snakeInstance.array.pop();
+    }
+}
+
 
 function endGame(cause) {
     gameOver = true;
@@ -212,11 +255,15 @@ function startingScreen() {
     ctx.textAlign = "center";
     ctx.fillText("Press 'P' to Start", w / 2, h / 2);
 }
- 
+
+
 startingScreen();
 
 function startGame() {
     document.getElementById("rule_container").style.display = "none";
     document.getElementById("game-container").style.display = "block";
+    document.getElementById("score-container").style.display = "block";
+    document.getElementById("immunebar").style.display="block";
+    document.getElementById("time_container").style.display="block";
     play();
 }
