@@ -222,21 +222,24 @@ function startGame() {
 }
 
 function sendScore(cause) {
-    fetch("http://127.0.0.1:5000/score", {
-        method: "POST",
+    const data = {
+        score: score,
+        cause: cause
+    };
+    fetch('http://127.0.0.1:5000/add_score', {
+        method: 'POST',
         headers: {
-            "Content-Type": "application/json"
+            'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            player: playerName || "Anonymous",
-            score: score,
-            cause: cause,
-            time: new Date().toLocaleString()
-        })
+        body: JSON.stringify(data),
     })
-    .then(res => res.json())
-    .then(data => console.log("Saved:", data))
-    .catch(err => console.error("Error:", err));
+    .then(response => response.json())
+    .then(result => {
+        console.log('Score saved to history:', result);
+    })
+    .catch((error) => {
+        console.error('Error saving score:', error);
+    });
 }
 
 
