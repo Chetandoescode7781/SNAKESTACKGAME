@@ -145,6 +145,17 @@ function animate() {
                isimmune = false;
                }
               }
+const immunebar = document.getElementById("immunebar");
+if(isimmune && immuneCounter > 0){
+    const maxCounter = 10 * fps;
+    const progress = (immuneCounter / maxCounter) * 150;
+    immunebar.style.display = "block";
+    immunebar.style.width = progress + "px";
+    immunebar.style.backgroundColor = "Azure";
+}else {
+    immunebar.style.display = "none";
+}
+
          checkCollisions(); 
        if(score > 0 && score % 3 == 0){immuneCollisionCheck();}
        else foodCollisionCheck();
@@ -182,7 +193,7 @@ function checkCollisions() {
      else {if (head.x < 0 || head.x >= w / cw || head.y < 0 || head.y >= h / cw) {
         endGame("WALL");
         return true;
-        }
+        }}
 
      
     for (let i = 1; i < snakeInstance.array.length; i++) {
@@ -192,14 +203,14 @@ function checkCollisions() {
         }
     }}
   
-}
+
 
 function foodCollisionCheck() {
     let head = snakeInstance.array[0];
     if (head.x === foodInstance.x && head.y === foodInstance.y) {
         score++; 
         foodInstance.reset();
-        
+        immunefood.reset();
     } else {
         snakeInstance.array.pop();
     }
