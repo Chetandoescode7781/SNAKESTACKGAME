@@ -6,8 +6,17 @@
     <title>SNAKE GAME</title>
 </head>
 <body style="display:flex; justify-content:center; align-items:center; margin:0; height:100vh; background-color: rgb(168, 217, 6);">
-    <div id="rule_container" style="background-color: rgb(108, 118, 98); text-align: center; padding: 20px; border: 10px solid rgb(96, 46, 0); ">
+
+<div id="rule_container" style="background-color: rgb(108, 118, 98); text-align: center; padding: 20px; border: 10px solid rgb(96, 46, 0); ">
         <h1 style="text-align: center;color: greenyellow;text-shadow: 3px 3px 5px black;">SNAKE GAME &#128013</h1>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="playerNameInput" placeholder="Enter Name" style="padding: 8px; border-radius: 5px; border: none; outline: none;">
+            <select id="difficulty" style="padding: 8px; border-radius: 5px; border: none; cursor: pointer;">
+                <option value="5">Easy</option>
+                <option value="10" selected>Medium</option>
+                <option value="18">Hard</option>
+            </select>
+        </div>
         <h3 style="color: red;">Rules:</h3>
      <ul>
         <li>Use arrow keys or WASD to control the snake</li>
@@ -15,7 +24,7 @@
         <li> Eat the food to grow longer</li>
         <li> Avoid hitting the walls or yourself</li>
      </ul>
-
+     <br>
     <button onclick="startGame()" style="background-color: greenyellow; color: black; font-size: 16px; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Start</button>
 </div>
 <div id="score-container" style="background-color: rgb(108, 118, 98); text-align: center; padding: 10px; border: 10px solid rgb(96, 46, 0); margin-top: 20px;display: none;">
