@@ -18,6 +18,7 @@ let isPaused = false;
 let isimmune=false;
 let immuneCounter=0;
 let playerName = "";
+let startTime;
 
 canvas.style.backgroundColor = "#000";
 
@@ -247,6 +248,7 @@ function restartGame() {
 function play(){
       snakeInstance.create();
       restartGame();  
+       startTime = Date.now();
 }
 
 function startingScreen() {
@@ -269,24 +271,26 @@ function startGame() {
 }
 
 function sendScore(cause) {
-    const data = {
-        score: score,
-        cause: cause
-    };
-    fetch('http://127.0.0.1:5000/add_score', {
+    const duration = Math.floor((Date.now() - startTime) / 1000);
+
+    // If frontend served by a different server/port, use full URL:
+    fetch('http://127.0.0.1:5000/save_score', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+            name: playerName,
+            score: score,
+            cause: cause,
+            duration: duration
+        })
     })
-    .then(response => response.json())
-    .then(result => {
-        console.log('Score saved to history:', result);
+    .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
     })
-    .catch((error) => {
-        console.error('Error saving score:', error);
-    });
+    .then(data => console.log('Saved:', data))
+    .catch(err => console.error('Save failed:', err));
 }
-
 

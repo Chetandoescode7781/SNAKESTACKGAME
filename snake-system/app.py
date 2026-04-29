@@ -1,21 +1,54 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from datetime import datetime
-app = Flask(__name__)
-CORS(app) 
-@app.route('/add_score', methods=['POST'])
-def add_score():
-    data = request.get_json()
-    score = data.get('score')
-    cause = data.get('cause')
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+import os
+app = Flask(_name_)
+CORS(app)   # allows all origins by default (for dev)
+
+
+HISTORY_FILE = 'history.txt'
+
+# Serve index.html (optional: if you want Flask to serve the frontend)
+@app.route('/')
+def index_page():
+    return send_from_directory('static', 'index.html')
+
+# API endpoint to save score (only one route for POST)
+@app.route('/save_score', methods=['POST'])
+def save_score():
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({'status': 'error', 'message': 'Invalid or missing JSON'}), 400
+
+    required_fields = ['name', 'score', 'cause', 'duration']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'status': 'error', 'message': f'Missing field: {field}'}), 400
+
     try:
-        with open("history.txt", "a") as f:
-            f.write(f"[{timestamp}] Score: {score} | Cause: {cause}\n")
-        
-        return jsonify({"status": "success", "message": "Score saved!"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
-    
+        name = str(data['name']).strip()
+        score = int(data['score'])
+        cause = str(data['cause']).upper()
+        duration = int(data['duration'])
+    except (ValueError, TypeError):
+        return jsonify({'status': 'error', 'message': 'Invalid field types'}), 400
+
+    if not name:
+        return jsonify({'status': 'error', 'message': 'Name is empty'}), 400
+    if score < 0:
+        return jsonify({'status': 'error', 'message': 'Invalid score'}), 400
+    if duration < 0:
+        return jsonify({'status': 'error', 'message': 'Invalid duration'}), 400
+
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    line = f"[{timestamp}] {name} | {score} | {cause} | {duration}\n"
+
+    # Ensure history file exists and append
+    with open(HISTORY_FILE, 'a', encoding='utf-8') as f:
+        f.write(line)
+
+    return jsonify({'status': 'ok', 'message': 'Score saved'}), 200
+
+if _name_ == '_main_':
+    # Run on port 5000 to avoid conflict with static dev servers (5500)
+    app.run(host='127.0.0.1', port=5000, debug=True)
