@@ -1,1 +1,66 @@
+\documentclass[12pt, a4paper]{article}
 
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{Project Report: Web-Based Snake Game}
+\author{Chetan & Vinay}
+\date{29th of April, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This project is about building a Snake game that runs in a modern web browser using HTML5 Canvas , JavaScript and Python. The idea was to recreate the classic Snake game but also add some extra features like different types of food, increasing difficulty, and a temporary immunity feature. The game also connects to a backend to store scores.
+\end{abstract}
+
+\section{Introduction}
+Snake game is one of the most popular classic games where the player controls a snake that keeps moving and grows longer as it eats food. The goal is to survive as long as possible without crashing.
+
+In this project, I created a browser-based version of Snake. The main aim was to understand how games work using JavaScript, especially things like game loops, user input, and object-oriented programming.
+
+\section{Gameplay and Mechanics}
+
+\subsection{Controls and Setup}
+When the game starts, the player is asked to enter their name and choose a difficulty level. The difficulty affects how fast the snake moves.
+
+The controls are simple:
+\begin{itemize}
+    \item Arrow keys or WASD to move
+    \item Spacebar to pause or resume the game
+\end{itemize}
+
+\subsection{Food System}
+To make the game more interesting, I added different types of food:
+
+\begin{itemize}
+    \item \textbf{Normal Food:} Gives +1 score and increases the snake length.
+    \item \textbf{Bonus Food:} Appears randomly and gives +5 score and increases the snake length.
+    \item \textbf{Immune Food:} Appears after every few points. It gives temporary immunity where the snake can pass through walls.
+\end{itemize}
+
+There is also a small timer bar on the screen that shows how long the immunity will last.
+
+\section{Technical Implementation}
+
+\subsection{Graphics}
+The game is drawn using the HTML5 canvas. JavaScript is used to update the snake position, draw the food, and refresh the screen continuously.
+
+\subsection{Game Logic}
+I used a simple object-oriented approach:
+\begin{itemize}
+    \item Snake class handles movement and body
+    \item Food class handles spawning at random positions
+\end{itemize}
+
+The game runs using a loop that updates the state and redraws everything.
+
+\subsection{Backend}
+When the game ends, the score is sent to a backend server using a fetch request. The data includes the player's score and how the game ended.
+
+\section{Conclusion}
+Overall, this project helped me understand how games are built using JavaScript. Adding features like bonus food and wall immunity made the game more fun and less predictable.
+
+\end{document}
