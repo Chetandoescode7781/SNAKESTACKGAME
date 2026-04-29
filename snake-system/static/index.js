@@ -22,6 +22,7 @@ let immuneCounter=0;
 let playerName = "";
 let foodactive = true;
 let bonusactive = false;
+let highscore;
 canvas.style.backgroundColor = "#000";
 
 
@@ -314,6 +315,8 @@ function startGame() {
     document.getElementById("immunebar").style.display="block";
     document.getElementById("time_container").style.display="block";
     play();
+    getHighScore(playerName);
+
 }
 
 function sendScore(cause) {
@@ -340,5 +343,22 @@ function sendScore(cause) {
         console.error('Error saving score:', error);
     });
 }
+
+function getHighScore(username) {
+    fetch(`http://127.0.0.1:5000/get_highscore?name=${encodeURIComponent(username)}`)
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === "ok") {
+                console.log("Highscore for", username, ":", result.highscore);
+                document.getElementById("highscore").textContent = result.highscore;
+            } else {
+                console.error("Error fetching highscore:", result.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+}
+
 
 

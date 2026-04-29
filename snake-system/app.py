@@ -52,3 +52,25 @@ def save_score():
 if __name__ == '__main__':
     # Run on port 5000 to avoid conflict with static dev servers (5500)
     app.run(host='127.0.0.1', port=5000, debug=True)
+
+    # API endpoint to get highscore for a given username
+@app.route('/get_highscore', methods=['GET'])
+def get_highscore():
+    username = request.args.get('name', '').strip()
+    if not username:
+        return jsonify({'status': 'error', 'message': 'Missing username'}), 400
+
+    highscore = 0
+    try:
+        with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
+            for line in f:
+                if username in line:
+                    parts = line.strip().split('|')
+                    if len(parts) >= 3:
+                        score = int(parts[1].strip())
+                        if score > highscore:
+                            highscore = score
+    except FileNotFoundError:
+        return jsonify({'status': 'error', 'message': 'History file not found'}), 404
+
+    return jsonify({'status': 'ok', 'name': username, 'highscore': highscore}), 200
