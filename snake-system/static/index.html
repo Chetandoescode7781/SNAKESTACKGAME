@@ -4,41 +4,211 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SNAKE GAME</title>
-</head>
-<body style="display:flex; justify-content:center; align-items:center; margin:0; height:100vh; background-color: rgb(168, 217, 6);">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Syne:wght@400;700&display=swap');
 
-<div id="rule_container" style="background-color: rgb(108, 118, 98); text-align: center; padding: 20px; border: 10px solid rgb(96, 46, 0); ">
-        <h1 style="text-align: center;color: greenyellow;text-shadow: 3px 3px 5px black;">SNAKE GAME &#128013</h1>
-        <div style="margin-bottom: 15px;">
-            <input type="text" id="playerNameInput" placeholder="Enter Name" style="padding: 8px; border-radius: 5px; border: none; outline: none;">
-            <select id="difficulty" style="padding: 8px; border-radius: 5px; border: none; cursor: pointer;">
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #1a1a1a;
+            background-image: radial-gradient(circle at 20% 20%, #2a3d00 0%, transparent 50%),
+                              radial-gradient(circle at 80% 80%, #0d2600 0%, transparent 50%);
+            font-family: 'Syne', sans-serif;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        #rule_container {
+            background-color: #111;
+            text-align: center;
+            padding: 36px 40px;
+            border: 3px solid #5a8a00;
+            border-radius: 4px;
+            max-width: 420px;
+            width: 90vw;
+            box-shadow: 0 0 40px rgba(90, 138, 0, 0.3);
+        }
+
+        #rule_container h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 22px;
+            color: #aaff00;
+            text-shadow: 0 0 12px #aaff00aa;
+            margin-bottom: 28px;
+            line-height: 1.4;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        #playerNameInput,
+        #difficulty {
+            padding: 9px 14px;
+            border-radius: 3px;
+            border: 1px solid #5a8a00;
+            background: #1e1e1e;
+            color: #aaff00;
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            outline: none;
+        }
+
+        #playerNameInput::placeholder {
+            color: #556633;
+        }
+
+        #difficulty option {
+            background: #1e1e1e;
+        }
+
+        #rule_container h3 {
+            color: #ff4444;
+            font-size: 13px;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        #rule_container ul {
+            list-style: none;
+            color: #aaa;
+            font-size: 13px;
+            line-height: 2;
+            text-align: left;
+            padding-left: 8px;
+        }
+
+        #rule_container ul li::before {
+            content: '▸ ';
+            color: #5a8a00;
+        }
+
+        #start-btn {
+            margin-top: 28px;
+            background-color: #aaff00;
+            color: #111;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 12px;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 16px #aaff0066;
+        }
+
+        #start-btn:hover {
+            background-color: #ccff44;
+            box-shadow: 0 0 28px #aaff0099;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #score-container {
+            display: none;
+            background-color: #111;
+            text-align: center;
+            padding: 10px 24px;
+            border: 3px solid #5a8a00;
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(90, 138, 0, 0.2);
+        }
+
+        #score-container h2 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 14px;
+            color: #aaff00;
+        }
+
+        #time_container {
+            display: none;
+            position: relative;
+            width: 100%;
+        }
+
+        #time_container h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 11px;
+            color: #ff4444;
+            text-align: center;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        #immunebar {
+            display: none;
+            height: 8px;
+            width: 150px;
+            border-radius: 4px;
+            border: 1px solid #5a8a00;
+            background-color: #adf;
+            margin: 0 auto;
+            transition: width 0.1s linear;
+        }
+
+        #game-container {
+            display: none;
+            border: 3px solid #5a8a00;
+            box-shadow: 0 0 40px rgba(90, 138, 0, 0.4);
+            line-height: 0;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="rule_container">
+        <h1>SNAKE GAME &#128013;</h1>
+        <div class="input-row">
+            <input type="text" id="playerNameInput" placeholder="Enter Name">
+            <select id="difficulty">
                 <option value="5">Easy</option>
                 <option value="10" selected>Medium</option>
                 <option value="18">Hard</option>
             </select>
         </div>
-        <h3 style="color: red;">Rules:</h3>
-     <ul>
-        <li>Use arrow keys or WASD to control the snake</li>
-        <li>Press 'P' to Play &nbsp; Press 'Spacebar' to Pause &nbsp; Press 'R' to Restart</li>
-        <li> Eat the food to grow longer</li>
-        <li> Avoid hitting the walls or yourself</li>
-     </ul>
-     <br>
-    <button onclick="startGame()" style="background-color: greenyellow; color: black; font-size: 16px; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Start</button>
-</div>
-<div id="score-container" style="background-color: rgb(108, 118, 98); text-align: center; padding: 10px; border: 10px solid rgb(96, 46, 0); margin-top: 20px;display: none;">
-    <h2 style="color: greenyellow;">Score: <span id="score">0</span></h2>
- </div>
- <div id="time_container" style="display: none;">
-  <h1 style="position: absolute;top: 2px;left:41.8%;color:red;">time:</h1>   
- <div id="immunebar" style="border:1px solid rgb(96, 46, 0); width: 150px; height: 20px;position: absolute;top:28px;left:50%; margin-top: 10px; display: none;">
- </div> 
- </div>
+        <h3>Rules</h3>
+        <ul>
+            <li>Use arrow keys or WASD to move</li>
+            <li>P to play &nbsp;·&nbsp; Space to pause &nbsp;·&nbsp; R to restart</li>
+            <li>Eat food to grow longer</li>
+            <li>Avoid walls and yourself</li>
+        </ul>
+        <button id="start-btn" onclick="startGame()">START</button>
+    </div>
 
-<div id="game-container" style="border: 8px solid rgb(96, 46, 0); float: center; display:none;padding: 0%;margin: 0px;">
-<canvas id="canvas"></canvas>
-</div>
-<script src="index.js"></script>
+    <div class="right-panel">
+        <div id="score-container">
+            <h2>SCORE &nbsp;<span id="score">0</span></h2>
+        </div>
+        <div id="time_container">
+            <h1>IMMUNITY</h1>
+            <div id="immunebar"></div>
+        </div>
+        <div id="game-container">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
 </body>
 </html>

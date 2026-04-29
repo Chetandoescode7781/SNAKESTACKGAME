@@ -1,29 +1,32 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const gameContainer = document.getElementById("game-container");
- 
- canvas.width = window.innerHeight * 0.8;
- canvas.height = window.innerHeight * 0.8;  
- gameContainer.style.width = canvas.width + "px";
- gameContainer.style.height = canvas.height + "px";
-const cw = 10; 
+
+canvas.width = window.innerHeight * 0.8;
+canvas.height = window.innerHeight * 0.8;
+gameContainer.style.width = canvas.width + "px";
+gameContainer.style.height = canvas.height + "px";
+
+const cw = 10;
 const w = canvas.width;
 const h = canvas.height;
 const gridW = Math.floor(w / cw);
 const gridH = Math.floor(h / cw);
 
 let score = 0;
-let d = "right"; 
+let d = "right";
 let requestId;
 let gameOver = false;
 let isPaused = false;
-let isimmune=false;
-let immuneCounter=0;
+let isimmune = false;
+let immuneCounter = 0;
 let playerName = "";
-let foodactive = true;
-let bonusactive = false;
-canvas.style.backgroundColor = "#000";
+let ateFoodThisFrame = false;
+let bonusActive = false;
+let nextBonusSpawn = Date.now() + 15000;
+let baseFps = 8;
 
+canvas.style.backgroundColor = "#0a0a0a";
 
 function paint_cell(x, y, color = "lime") {
     ctx.fillStyle = color;
@@ -31,7 +34,6 @@ function paint_cell(x, y, color = "lime") {
     ctx.strokeStyle = "#111";
     ctx.strokeRect(x * cw, y * cw, cw, cw);
 }
-
 
 class Snake {
     constructor() {
@@ -47,7 +49,7 @@ class Snake {
 
     draw() {
         for (let i = 0; i < this.array.length; i++) {
-            let color = (i === 0) ? "#00ff00" : "lime"; 
+            let color = (i === 0) ? "#aaff00" : "#5a8a00";
             paint_cell(this.array[i].x, this.array[i].y, color);
         }
     }
@@ -61,7 +63,6 @@ class Snake {
         else if (d === "down") head.y++;
 
         this.array.unshift(head);
-       
     }
 }
 
@@ -85,46 +86,41 @@ class Food {
 const snakeInstance = new Snake();
 const foodInstance = new Food();
 const immunefood = new Food();
-const bonusfood = new Food();
-
+const bonusFood = new Food();
 
 document.addEventListener("keydown", (e) => {
     const key = e.key.toLowerCase();
 
-    
     if ((key === "w" || e.key === "ArrowUp") && d !== "down") d = "up";
     else if ((key === "s" || e.key === "ArrowDown") && d !== "up") d = "down";
     else if ((key === "a" || e.key === "ArrowLeft") && d !== "right") d = "left";
     else if ((key === "d" || e.key === "ArrowRight") && d !== "left") d = "right";
 
-   
-    if (key === "p" && (gameOver || !requestId)) {
-       play();
-    }
+    if (key === "p" && (gameOver || !requestId)) play();
 
-   
     if (e.code === "Space" && !gameOver) {
         if (!isPaused) {
             stopanimation();
             isPaused = true;
-            ctx.fillStyle = "yellow";
-            ctx.font = "30px Arial";
+            ctx.fillStyle = "rgba(0,0,0,0.6)";
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = "#aaff00";
+            ctx.font = "bold 28px 'Press Start 2P', monospace";
             ctx.textAlign = "center";
-           ctx.fillText("PAUSED ", w / 2, h / 2);
-           ctx.fillText("Press Space to Resume", w / 2, h / 2 + 40);
-
+            ctx.fillText("PAUSED", w / 2, h / 2);
+            ctx.font = "12px 'Press Start 2P', monospace";
+            ctx.fillStyle = "#888";
+            ctx.fillText("SPACE to resume", w / 2, h / 2 + 44);
         } else {
             isPaused = false;
             animate();
         }
     }
 
-  
     if (key === "r") restartGame();
 });
 
-
-let fps = 8; // Control speed
+let fps = baseFps;
 let now;
 let then = Date.now();
 let interval = 1000 / fps;
@@ -142,40 +138,48 @@ function animate() {
         then = now - (delta % interval);
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ateFoodThisFrame = false;
+
         snakeInstance.move();
-        
-      if (isimmune) {
-              immuneCounter--;
-              if (immuneCounter <= 0) {
-               isimmune = false;
-               }
-              }
-const immunebar = document.getElementById("immunebar");
-if(isimmune && immuneCounter > 0){
-    const maxCounter = 10 * fps;
-    const progress = (immuneCounter / maxCounter) * 150;
-    immunebar.style.display = "block";
-    immunebar.style.width = progress + "px";
-    immunebar.style.backgroundColor = "Azure";
-}else {
-    immunebar.style.display = "none";
-}
 
-         checkCollisions(); 
+        if (isimmune) {
+            immuneCounter--;
+            if (immuneCounter <= 0) isimmune = false;
+        }
 
+        const immunebar = document.getElementById("immunebar");
+        if (isimmune && immuneCounter > 0) {
+            const maxCounter = 10 * fps;
+            const progress = (immuneCounter / maxCounter) * 150;
+            immunebar.style.display = "block";
+            immunebar.style.width = progress + "px";
+        } else {
+            immunebar.style.display = "none";
+        }
 
-       if(score > 0 && score % 3 == 0){immuneCollisionCheck();}
-       else if (bonusactive){bonusCollisionCheck();}
-       else foodCollisionCheck();
+        if (!bonusActive && Date.now() >= nextBonusSpawn) {
+            bonusFood.reset();
+            bonusActive = true;
+        }
+
+        checkCollisions();
+
+        if (score > 0 && score % 3 === 0) immuneCollisionCheck();
+        else foodCollisionCheck();
+
+        bonusCollisionCheck();
+
+        if (!ateFoodThisFrame) snakeInstance.array.pop();
+
         snakeInstance.draw();
-       if(score > 0 && score % 3 == 0){immunefood.draw("blue");}
-       else if (score > 0 && Math.random() < 0.33 && !foodactive){bonusfood.draw("purple");
-        bonusactive = true;
-       }
-       else  if(!bonusactive) {foodInstance.draw(); foodactive = true;}
 
-       document.getElementById("score").textContent = score;
- 
+        if (score > 0 && score % 3 === 0) immunefood.draw("#4488ff");
+        else foodInstance.draw("#ff9900");
+
+        if (bonusActive) bonusFood.draw("#ff3333");
+
+        document.getElementById("score").textContent = score;
     }
 }
 
@@ -186,90 +190,77 @@ function stopanimation() {
 
 function checkCollisions() {
     let head = snakeInstance.array[0];
-     
-    if(isimmune){
-    if (head.x < 0) {
-       head.x = gridW - 1;
-       }
-     else if (head.x >= gridW) {
-         head.x = 0;   
-    }
-     if (head.y < 0) {
-        head.y = gridH - 1;
-         }
-          else if (head.y >= gridH) {
-         head.y = 0;
+
+    if (isimmune) {
+        if (head.x < 0) head.x = gridW - 1;
+        else if (head.x >= gridW) head.x = 0;
+        if (head.y < 0) head.y = gridH - 1;
+        else if (head.y >= gridH) head.y = 0;
+    } else {
+        if (head.x < 0 || head.x >= gridW || head.y < 0 || head.y >= gridH) {
+            endGame("WALL");
+            return true;
         }
     }
-     else {if (head.x < 0 || head.x >= gridW || head.y < 0 || head.y >= gridH) {
-        endGame("WALL");
-        return true;
-        }}
 
-     
     for (let i = 1; i < snakeInstance.array.length; i++) {
         if (head.x === snakeInstance.array[i].x && head.y === snakeInstance.array[i].y) {
             endGame("SELF");
             return true;
         }
-    }}
-  
-
+    }
+}
 
 function foodCollisionCheck() {
     let head = snakeInstance.array[0];
     if (head.x === foodInstance.x && head.y === foodInstance.y) {
-        score++; 
+        score++;
         foodInstance.reset();
         immunefood.reset();
         ateFoodThisFrame = true;
-        foodactive = false;
-    } else {
-        snakeInstance.array.pop();
     }
 }
 
 function immuneCollisionCheck() {
     let head = snakeInstance.array[0];
     if (head.x === immunefood.x && head.y === immunefood.y) {
-        score++; 
+        score++;
         isimmune = true;
-        immuneCounter = 10 * fps; 
+        immuneCounter = 10 * fps;
         foodInstance.reset();
         immunefood.reset();
         ateFoodThisFrame = true;
-
-         } else {
-        snakeInstance.array.pop();
     }
 }
 
-
 function bonusCollisionCheck() {
     let head = snakeInstance.array[0];
-    if (head.x === bonusfood.x && head.y === bonusfood.y) {
-        score=score+5; 
-       
-        foodInstance.reset();
-       bonusfood.reset();
+    if (bonusActive && head.x === bonusFood.x && head.y === bonusFood.y) {
+        score += 3;
+        bonusActive = false;
+        nextBonusSpawn = Date.now() + 8000 + Math.random() * 12000;
         ateFoodThisFrame = true;
-            bonusactive = false;
-
-         } else {
-        snakeInstance.array.pop();
     }
 }
 
 function endGame(cause) {
     gameOver = true;
     stopanimation();
-    
-    ctx.fillStyle = "white";
-    ctx.font = "30px Arial";
+
+    ctx.fillStyle = "rgba(0,0,0,0.65)";
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = "#ff4444";
+    ctx.font = "bold 22px 'Press Start 2P', monospace";
     ctx.textAlign = "center";
-    ctx.fillText("GAME OVER (" + cause + ")", w / 2, h / 2);
-    ctx.fillText("Score: " + score, w / 2, h / 2 + 40);
-    ctx.fillText("Press 'R' to Restart", w / 2, h / 2 + 80);
+    ctx.fillText("GAME OVER", w / 2, h / 2 - 20);
+    ctx.fillStyle = "#888";
+    ctx.font = "11px 'Press Start 2P', monospace";
+    ctx.fillText("cause: " + cause, w / 2, h / 2 + 14);
+    ctx.fillStyle = "#aaff00";
+    ctx.fillText("score: " + score, w / 2, h / 2 + 40);
+    ctx.fillStyle = "#555";
+    ctx.fillText("R to restart", w / 2, h / 2 + 70);
+
     sendScore(cause);
 }
 
@@ -279,40 +270,42 @@ function restartGame() {
     isPaused = false;
     score = 0;
     d = "right";
+    fps = parseInt(document.getElementById("difficulty").value);
+    interval = 1000 / fps;
     snakeInstance.create();
     foodInstance.reset();
+    bonusActive = false;
+    nextBonusSpawn = Date.now() + 8000 + Math.random() * 12000;
     animate();
 }
 
-function play(){
-      snakeInstance.create();
-      restartGame();  
-       startTime = Date.now();
+function play() {
+    snakeInstance.create();
+    restartGame();
 }
 
 function startingScreen() {
-    ctx.fillStyle = "green";
-    ctx.font = "30px Arial";
+    ctx.fillStyle = "#aaff00";
+    ctx.font = "12px 'Press Start 2P', monospace";
     ctx.textAlign = "center";
-    ctx.fillText("Press 'P' to Start", w / 2, h / 2);
+    ctx.fillText("Press P to Start", w / 2, h / 2);
 }
-
 
 startingScreen();
 
 function startGame() {
-    const  nameInput = document.getElementById("playerNameInput").value;
+    const nameInput = document.getElementById("playerNameInput").value;
     playerName = nameInput.trim() !== "" ? nameInput : "Player 1";
-    console.log("Player Name:" + playerName);
     const difficultySelect = document.getElementById("difficulty");
     fps = parseInt(difficultySelect.value);
+    baseFps = fps;
     interval = 1000 / fps;
     then = Date.now();
     document.getElementById("rule_container").style.display = "none";
     document.getElementById("game-container").style.display = "block";
     document.getElementById("score-container").style.display = "block";
-    document.getElementById("immunebar").style.display="block";
-    document.getElementById("time_container").style.display="block";
+    document.getElementById("immunebar").style.display = "block";
+    document.getElementById("time_container").style.display = "block";
     play();
 }
 
@@ -340,5 +333,3 @@ function sendScore(cause) {
         console.error('Error saving score:', error);
     });
 }
-
-
