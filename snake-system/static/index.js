@@ -279,6 +279,7 @@ startingScreen();
 function startGame() {
     const  nameInput = document.getElementById("playerNameInput").value;
     playerName = nameInput.trim() !== "" ? nameInput : "Player 1";
+    console.log("Player Name:" + playerName);
     const difficultySelect = document.getElementById("difficulty");
     fps = parseInt(difficultySelect.value);
     interval = 1000 / fps;
