@@ -173,6 +173,18 @@
         canvas {
             display: block;
         }
+        #score-container h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    color: #5a8a00; /* A darker green to distinguish it from current score */
+    margin-top: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#highscore-display {
+    color: #aaff00; /* Keeps the actual number bright */
+}
     </style>
 </head>
 <body>
@@ -186,26 +198,32 @@
                 <option value="18">Hard</option>
             </select>
         </div>
-        <h3 style="color: red;">Rules:</h3>
-     <ul>
-        <li>Use arrow keys or WASD to control the snake</li>
-        <li>Press 'P' to Play &nbsp; Press 'Spacebar' to Pause &nbsp; Press 'R' to Restart</li>
-        <li> Eat the food to grow longer</li>
-        <li> Avoid hitting the walls or yourself</li>
-     </ul>
-     <br>
-    <button onclick="startGame()" style="background-color: greenyellow; color: black; font-size: 16px; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Start</button>
-</div>
-<div id="score-container" style="background-color: rgb(108, 118, 98); text-align: center; padding: 10px; border: 10px solid rgb(96, 46, 0); margin-top: 20px;display: none;">
-    <h2 style="color: greenyellow;">Score: <span id="score">0</span></h2>
-     <h2 style="color: greenyellow;">high score: <span id="high-score">0</span></h2>
- </div>
- <div id="time_container" style="display: none;">
-  <h1 style="position: absolute;top: 2px;left:41.8%;color:red;">time:</h1>   
- <div id="immunebar" style="border:1px solid rgb(96, 46, 0); width: 150px; height: 20px;position: absolute;top:28px;left:50%; margin-top: 10px; display: none;">
- </div> 
- </div>
+        <h3>Rules</h3>
+        <ul>
+            <li>Use arrow keys or WASD to move</li>
+            <li>P to play &nbsp;·&nbsp; Space to pause &nbsp;·&nbsp; R to restart</li>
+            <li>Eat food to grow longer</li>
+            <li>Avoid walls and yourself</li>
+        </ul>
+        <button id="start-btn" onclick="startGame()">START</button>
+    </div>
 
-    <script src="index.js"></script>
+    <div class="right-panel">
+        <div id="score-container">
+            <h2>SCORE &nbsp;<span id="score">0</span></h2>
+           
+              <h4>High Score: <span id="highscore-display">0</span></h4>
+             </div>
+      
+        <div id="time_container">
+            <h1>IMMUNITY</h1>
+            <div id="immunebar"></div>
+        </div>
+        <div id="game-container">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+
+    <script src="static/index.js"></script>
 </body>
 </html>

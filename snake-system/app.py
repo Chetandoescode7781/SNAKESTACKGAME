@@ -46,14 +46,9 @@ def save_score():
     # Ensure history file exists and append
     with open(HISTORY_FILE, 'a', encoding='utf-8') as f:
         f.write(line)
-
     return jsonify({'status': 'ok', 'message': 'Score saved'}), 200
 
-if __name__ == '__main__':
-    # Run on port 5000 to avoid conflict with static dev servers (5500)
-    app.run(host='127.0.0.1', port=5000, debug=True)
-
-    # API endpoint to get highscore for a given username
+ # API endpoint to get highscore for a given username
 @app.route('/get_highscore', methods=['GET'])
 def get_highscore():
     username = request.args.get('name', '').strip()
@@ -74,3 +69,9 @@ def get_highscore():
         return jsonify({'status': 'error', 'message': 'History file not found'}), 404
 
     return jsonify({'status': 'ok', 'name': username, 'highscore': highscore}), 200
+
+if __name__ == '__main__':
+    # Run on port 5000 to avoid conflict with static dev servers (5500)
+    app.run(host='127.0.0.1', port=5000, debug=True)
+
+   

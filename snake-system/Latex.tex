@@ -1,66 +1,194 @@
 \documentclass[12pt, a4paper]{article}
-
 \usepackage[utf8]{inputenc}
 \usepackage{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
 \geometry{margin=1in}
+\onehalfspacing
+\setlength{\parskip}{6pt}
 
-\title{Project Report: Web-Based Snake Game}
-\author{Chetan & Vinay}
-\date{29th of April, 2026}
+\title{Web-Based Snake Game}
+\author{Chetan \& Vinay}
+\date{29th of May 2026}
 
 \begin{document}
 
 \maketitle
 
-\begin{abstract}
-This project is about building a Snake game that runs in a modern web browser using HTML5 Canvas , JavaScript and Python. The idea was to recreate the classic Snake game but also add some extra features like different types of food, increasing difficulty, and a temporary immunity feature. The game also connects to a backend to store scores.
-\end{abstract}
+\section{External Libraries}
+This project mainly uses standard web technologies such as HTML5, CSS, and JavaScript. These technologies are enough to build interactive browser-based games without depending on heavy external libraries.
 
-\section{Introduction}
-Snake game is one of the most popular classic games where the player controls a snake that keeps moving and grows longer as it eats food. The goal is to survive as long as possible without crashing.
+On the backend side, Python is used along with the Flask framework. Flask is a lightweight web framework that helps in handling HTTP requests and building APIs easily. It is suitable for small projects like this where only basic data handling is required.
 
-In this project, I created a browser-based version of Snake. The main aim was to understand how games work using JavaScript, especially things like game loops, user input, and object-oriented programming.
+The decision to avoid additional libraries was made to keep the project simple and focused on understanding core concepts like game logic, rendering, and client-server communication.
 
-\section{Gameplay and Mechanics}
+\section{Design \& Architecture}
 
-\subsection{Controls and Setup}
-When the game starts, the player is asked to enter their name and choose a difficulty level. The difficulty affects how fast the snake moves.
+\subsection{System Overview}
+The system follows a simple client-server architecture. It consists of a frontend that runs in the browser and a backend that runs locally using Flask.
 
-The controls are simple:
+The frontend is responsible for rendering the game and handling user input. The backend is responsible for storing the score data.
+
+\subsection{Frontend Design}
+The frontend is implemented using HTML5 Canvas and JavaScript. The canvas element acts as the main drawing area where the snake and food are displayed.
+
+JavaScript handles:
 \begin{itemize}
-    \item Arrow keys or WASD to move
-    \item Spacebar to pause or resume the game
+    \item Game loop execution
+    \item Snake movement
+    \item Collision detection
+    \item Food generation
 \end{itemize}
 
-\subsection{Food System}
-To make the game more interesting, I added different types of food:
+\subsection{Backend Design}
+The backend is implemented using Flask. It exposes a simple API endpoint that receives the player's score.
 
+When the game ends, a fetch request is sent from the frontend to the backend. The backend then stores the data in a text file.
+
+\subsection{Data Flow}
+The overall data flow in the system can be described as follows:
+
+User input $\rightarrow$ JavaScript logic $\rightarrow$ Canvas rendering $\rightarrow$ Game Over $\rightarrow$ Fetch API $\rightarrow$ Flask server $\rightarrow$ history.txt
+
+This flow ensures proper separation of concerns between the frontend and backend.
+
+\section{Features Implemented}
+
+\subsection{Basic Gameplay}
+The main gameplay is based on the classic Snake game. The snake moves continuously and grows in length when it eats food. The player must avoid collisions.
+
+\subsection{Difficulty Levels}
+At the start of the game, the user selects a difficulty level. This affects the speed of the snake. Higher difficulty means faster movement, making the game more challenging.
+\includegraphics[width=1\textwidth]{DIFFICULTY_LEVELS.png}
+
+
+\subsection{Food Types}
+Multiple types of food are implemented:
 \begin{itemize}
-    \item \textbf{Normal Food:} Gives +1 score and increases the snake length.
-    \item \textbf{Bonus Food:} Appears randomly and gives +5 score and increases the snake length.
-    \item \textbf{Immune Food:} Appears after every few points. It gives temporary immunity where the snake can pass through walls.
+    \item Normal Food: Increases score by 1
+\end{itemize}
+\includegraphics[width=1\textwidth]{NORMAL_FOOD.png}
+\begin{itemize}
+    \item Bonus Food: Gives higher score and appears randomly
+\end{itemize}
+    \begin{itemize}
+    \item Immune Food: Allows the snake to pass through walls temporarily
+\end{itemize}
+\includegraphics[width=0.8\textwidth]{BONUS&IMMUNE_FOOD.png}
+
+\subsection{Pause Functionality}
+The game can be paused and resumed using the spacebar. This feature is useful for the player to take breaks.
+
+\includegraphics[width=0.8\textwidth]{PAUSED.png}
+
+\subsection{Score Tracking}
+The score increases as the snake eats food. When the game ends, the score is sent to the backend and stored.
+
+\includegraphics[width=0.8\textwidth]{DISPLAY_SCORE.png}
+
+\section{Algorithm and Logic}
+
+\subsection{Game Loop}
+The game runs using a loop that repeatedly updates and redraws the game state.
+
+\textbf{Pseudo Code:}
+\begin{verbatim}
+while game is running:
+    update snake position
+    check collisions
+    check food consumption
+    update score
+    redraw canvas
+\end{verbatim}
+
+\subsection{Collision Detection}
+Collision detection is done by checking:
+\begin{itemize}
+    \item If the snake hits the wall
+    \item If the snake hits itself
 \end{itemize}
 
-There is also a small timer bar on the screen that shows how long the immunity will last.
+If a collision is detected, the game ends.
 
-\section{Technical Implementation}
+\subsection{Food Generation}
+Food is generated at random positions within the grid. Care is taken to ensure that food does not spawn on the snake's body.
 
-\subsection{Graphics}
-The game is drawn using the HTML5 canvas. JavaScript is used to update the snake position, draw the food, and refresh the screen continuously.
+\section{Directory Structure}
 
-\subsection{Game Logic}
-I used a simple object-oriented approach:
+\begin{verbatim}
+snake-system/
+│── static/
+│   ├── index.html
+│   ├── index.js
+│   └── style.css
+│
+│── app.py
+│── history.txt
+│── admin.sh
+│── Latex.tex
+│── README.md
+\end{verbatim}
+
+Each file has a specific purpose. The static folder contains all frontend files. The backend is handled by app.py. The history.txt file is used to store scores.
+
+\section{Installation \& Setup}
+
+To run this project, the following steps are required:
+
 \begin{itemize}
-    \item Snake class handles movement and body
-    \item Food class handles spawning at random positions
+    \item Install Python 3.x
+    \item Install Flask using pip
+    \begin{verbatim}
+pip install flask
+    \end{verbatim}
+    \item Navigate to the project folder
+    \item Run the server using:
+    \begin{verbatim}
+python app.py
+    \end{verbatim}
 \end{itemize}
 
-The game runs using a loop that updates the state and redraws everything.
+The project works on modern browsers such as Chrome and Edge.
 
-\subsection{Backend}
-When the game ends, the score is sent to a backend server using a fetch request. The data includes the player's score and how the game ended.
+\section{Usage}
 
-\section{Conclusion}
-Overall, this project helped me understand how games are built using JavaScript. Adding features like bonus food and wall immunity made the game more fun and less predictable.
+After starting the server, open a browser and go to:
+
+\begin{verbatim}
+http://127.0.0.1:5000
+\end{verbatim}
+
+Enter your name and select difficulty. Use arrow keys or WASD to control the snake. Press spacebar to pause or resume the game.
+
+\includegraphics[width=0.8\textwidth]{START_SCREEN.png}
+
+The objective is to collect food and achieve the highest possible score.
+
+\section{Retrospective}
+
+\subsection{Challenges Faced}
+Several challenges were faced during development. One challenge was implementing smooth movement of the snake. Another challenge was correctly detecting collisions in all scenarios.
+
+Backend integration was also slightly difficult, especially sending and receiving data properly.
+
+\subsection{Solutions}
+These problems were solved by testing different approaches and debugging step by step. Console logs were used to track values and identify issues.
+
+\subsection{Future Improvements}
+Future improvements include:
+\begin{itemize}
+    \item Adding sound effects
+    \item Improving UI design
+    \item Adding multiple levels
+    \item Using a database instead of text file
+\end{itemize}
+
+\section{References}
+
+\begin{itemize}
+    \item JavaScript Documentation
+    \item HTML5 Canvas Tutorials
+    \item Flask Documentation
+\end{itemize}
 
 \end{document}

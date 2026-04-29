@@ -25,8 +25,7 @@ let ateFoodThisFrame = false;
 let bonusActive = false;
 let nextBonusSpawn = Date.now() + 15000;
 let baseFps = 8;
-
-let highscore;
+let highscore = 0;
 canvas.style.backgroundColor = "#0a0a0a";
 
 function paint_cell(x, y, color = "lime") {
@@ -261,6 +260,7 @@ function endGame(cause) {
     ctx.fillText("score: " + score, w / 2, h / 2 + 40);
     ctx.fillStyle = "#555";
     ctx.fillText("R to restart", w / 2, h / 2 + 70);
+    document.getElementById("highscore-display").textContent = Math.max(score, highscore);
 
     sendScore(cause);
 }
@@ -293,6 +293,7 @@ function startingScreen() {
 }
 
 startingScreen();
+let startTime;
 
 function startGame() {
     const nameInput = document.getElementById("playerNameInput").value;
@@ -301,6 +302,7 @@ function startGame() {
     fps = parseInt(difficultySelect.value);
     baseFps = fps;
     interval = 1000 / fps;
+    startTime = Date.now();
     then = Date.now();
     document.getElementById("rule_container").style.display = "none";
     document.getElementById("game-container").style.display = "block";
@@ -308,8 +310,7 @@ function startGame() {
     document.getElementById("immunebar").style.display = "block";
     document.getElementById("time_container").style.display = "block";
     play();
-    getHighScore(playerName);
-
+    fetchHighScore(playerName);
 }
 
 function sendScore(cause) {
@@ -331,27 +332,31 @@ function sendScore(cause) {
     .then(response => response.json())
     .then(result => {
         console.log('Score saved to history:', result);
+
+        // Update local high score display immediately if they beat it
+        const currentHighScore = parseInt(document.getElementById("highscore-display").textContent) || 0;
+        if (score > currentHighScore) {
+            document.getElementById("highscore-display").textContent = score;
+        }
     })
+    
     .catch((error) => {
         console.error('Error saving score:', error);
     });
 }
 
-function getHighScore(username) {
-    fetch(`http://127.0.0.1:5000/get_highscore?name=${encodeURIComponent(username)}`)
+function fetchHighScore(name) {
+    // URL encode the name to handle spaces or special characters safely
+    const url = `http://127.0.0.1:5000/get_highscore?name=${encodeURIComponent(name)}`;
+    
+    fetch(url)
         .then(response => response.json())
-        .then(result => {
-            if (result.status === "ok") {
-                console.log("Highscore for", username, ":", result.highscore);
-                document.getElementById("highscore").textContent = result.highscore;
-            } else {
-                console.error("Error fetching highscore:", result.message);
+        .then(data => {
+            if (data.status === 'ok') {
+                document.getElementById("highscore-display").textContent = data.highscore;
             }
         })
         .catch(error => {
-            console.error("Error:", error);
+            console.error('Error fetching high score:', error);
         });
 }
-
-
-
