@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from datetime import datetime
 import os
-app = Flask(_name_)
+app = Flask(__name__)
 CORS(app)   # allows all origins by default (for dev)
 
 
@@ -49,6 +49,6 @@ def save_score():
 
     return jsonify({'status': 'ok', 'message': 'Score saved'}), 200
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     # Run on port 5000 to avoid conflict with static dev servers (5500)
     app.run(host='127.0.0.1', port=5000, debug=True)

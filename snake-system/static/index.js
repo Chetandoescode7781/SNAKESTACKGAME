@@ -20,7 +20,8 @@ let isPaused = false;
 let isimmune=false;
 let immuneCounter=0;
 let playerName = "";
-
+let foodactive = true;
+let bonusactive = false;
 canvas.style.backgroundColor = "#000";
 
 
@@ -84,6 +85,7 @@ class Food {
 const snakeInstance = new Snake();
 const foodInstance = new Food();
 const immunefood = new Food();
+const bonusfood = new Food();
 
 
 document.addEventListener("keydown", (e) => {
@@ -160,11 +162,17 @@ if(isimmune && immuneCounter > 0){
 }
 
          checkCollisions(); 
+
+
        if(score > 0 && score % 3 == 0){immuneCollisionCheck();}
+       else if (bonusactive){bonusCollisionCheck();}
        else foodCollisionCheck();
         snakeInstance.draw();
        if(score > 0 && score % 3 == 0){immunefood.draw("blue");}
-       else  foodInstance.draw();
+       else if (score > 0 && Math.random() < 0.33 && !foodactive){bonusfood.draw("purple");
+        bonusactive = true;
+       }
+       else  if(!bonusactive) {foodInstance.draw(); foodactive = true;}
 
        document.getElementById("score").textContent = score;
  
@@ -215,6 +223,7 @@ function foodCollisionCheck() {
         foodInstance.reset();
         immunefood.reset();
         ateFoodThisFrame = true;
+        foodactive = false;
     } else {
         snakeInstance.array.pop();
     }
@@ -235,6 +244,21 @@ function immuneCollisionCheck() {
     }
 }
 
+
+function bonusCollisionCheck() {
+    let head = snakeInstance.array[0];
+    if (head.x === bonusfood.x && head.y === bonusfood.y) {
+        score=score+5; 
+       
+        foodInstance.reset();
+       bonusfood.reset();
+        ateFoodThisFrame = true;
+            bonusactive = false;
+
+         } else {
+        snakeInstance.array.pop();
+    }
+}
 
 function endGame(cause) {
     gameOver = true;
