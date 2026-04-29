@@ -9,6 +9,8 @@ const gameContainer = document.getElementById("game-container");
 const cw = 10; 
 const w = canvas.width;
 const h = canvas.height;
+const gridW = Math.floor(w / cw);
+const gridH = Math.floor(h / cw);
 
 let score = 0;
 let d = "right"; 
@@ -18,7 +20,6 @@ let isPaused = false;
 let isimmune=false;
 let immuneCounter=0;
 let playerName = "";
-let startTime;
 
 canvas.style.backgroundColor = "#000";
 
@@ -71,8 +72,8 @@ class Food {
     }
 
     reset() {
-        this.x = Math.floor(Math.random() * (w / cw));
-        this.y = Math.floor(Math.random() * (h / cw));
+        this.x = Math.floor(Math.random() * gridW);
+        this.y = Math.floor(Math.random() * gridH);
     }
 
     draw(color = "orange") {
@@ -83,6 +84,7 @@ class Food {
 const snakeInstance = new Snake();
 const foodInstance = new Food();
 const immunefood = new Food();
+
 
 document.addEventListener("keydown", (e) => {
     const key = e.key.toLowerCase();
@@ -146,6 +148,17 @@ function animate() {
                isimmune = false;
                }
               }
+const immunebar = document.getElementById("immunebar");
+if(isimmune && immuneCounter > 0){
+    const maxCounter = 10 * fps;
+    const progress = (immuneCounter / maxCounter) * 150;
+    immunebar.style.display = "block";
+    immunebar.style.width = progress + "px";
+    immunebar.style.backgroundColor = "Azure";
+}else {
+    immunebar.style.display = "none";
+}
+
          checkCollisions(); 
        if(score > 0 && score % 3 == 0){immuneCollisionCheck();}
        else foodCollisionCheck();
@@ -168,22 +181,22 @@ function checkCollisions() {
      
     if(isimmune){
     if (head.x < 0) {
-       head.x = (w / cw) - 1;
+       head.x = gridW - 1;
        }
-     else if (head.x >= w / cw) {
+     else if (head.x >= gridW) {
          head.x = 0;   
     }
      if (head.y < 0) {
-        head.y = (h / cw) - 1;
+        head.y = gridH - 1;
          }
-          else if (head.y >= h / cw) {
+          else if (head.y >= gridH) {
          head.y = 0;
         }
     }
-     else {if (head.x < 0 || head.x >= w / cw || head.y < 0 || head.y >= h / cw) {
+     else {if (head.x < 0 || head.x >= gridW || head.y < 0 || head.y >= gridH) {
         endGame("WALL");
         return true;
-        }
+        }}
 
      
     for (let i = 1; i < snakeInstance.array.length; i++) {
@@ -193,14 +206,15 @@ function checkCollisions() {
         }
     }}
   
-}
+
 
 function foodCollisionCheck() {
     let head = snakeInstance.array[0];
     if (head.x === foodInstance.x && head.y === foodInstance.y) {
         score++; 
         foodInstance.reset();
-        
+        immunefood.reset();
+        ateFoodThisFrame = true;
     } else {
         snakeInstance.array.pop();
     }
@@ -214,6 +228,7 @@ function immuneCollisionCheck() {
         immuneCounter = 10 * fps; 
         foodInstance.reset();
         immunefood.reset();
+        ateFoodThisFrame = true;
 
          } else {
         snakeInstance.array.pop();
@@ -262,6 +277,13 @@ function startingScreen() {
 startingScreen();
 
 function startGame() {
+    const  nameInput = document.getElementById("playerNameInput").value;
+    playerName = nameInput.trim() !== "" ? nameInput : "Player 1";
+    console.log("Player Name:" + playerName);
+    const difficultySelect = document.getElementById("difficulty");
+    fps = parseInt(difficultySelect.value);
+    interval = 1000 / fps;
+    then = Date.now();
     document.getElementById("rule_container").style.display = "none";
     document.getElementById("game-container").style.display = "block";
     document.getElementById("score-container").style.display = "block";
@@ -286,11 +308,13 @@ function sendScore(cause) {
             duration: duration
         })
     })
-    .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
+    .then(response => response.json())
+    .then(result => {
+        console.log('Score saved to history:', result);
     })
-    .then(data => console.log('Saved:', data))
-    .catch(err => console.error('Save failed:', err));
+    .catch((error) => {
+        console.error('Error saving score:', error);
+    });
 }
+
 
