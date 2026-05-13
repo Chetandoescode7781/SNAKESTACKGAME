@@ -42,7 +42,12 @@ def save_score():
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     line = f"[{timestamp}] {name} | {score} | {cause} | {duration}\n"
-
+     
+    if not os.path.exists("history.txt"):
+    # Create the file with a header line
+     with open("history.txt", "w") as f:
+        f.write(line)
+     return jsonify({'status': 'ok', 'message': 'Score saved'}), 200
     # Ensure history file exists and append
     with open(HISTORY_FILE, 'a', encoding='utf-8') as f:
         f.write(line)
