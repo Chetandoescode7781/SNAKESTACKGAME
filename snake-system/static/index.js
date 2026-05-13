@@ -23,9 +23,10 @@ let immuneCounter = 0;
 let playerName = "";
 let ateFoodThisFrame = false;
 let bonusActive = false;
-let nextBonusSpawn = Date.now() + 15000;
+let probability=1;
 let baseFps = 8;
-let highscore = 0;
+let highscore ;
+let immuneFoodActive = false;
 canvas.style.backgroundColor = "#0a0a0a";
 
 function paint_cell(x, y, color = "lime") {
@@ -157,15 +158,10 @@ function animate() {
         } else {
             immunebar.style.display = "none";
         }
-
-        if (!bonusActive && Date.now() >= nextBonusSpawn) {
-            bonusFood.reset();
-            bonusActive = true;
-        }
-
+        
         checkCollisions();
 
-        if (score > 0 && score % 3 === 0) immuneCollisionCheck();
+        if (immuneFoodActive===true) immuneCollisionCheck();
         else foodCollisionCheck();
 
         bonusCollisionCheck();
@@ -174,11 +170,9 @@ function animate() {
 
         snakeInstance.draw();
 
-        if (score > 0 && score % 3 === 0) immunefood.draw("#4488ff");
-        else foodInstance.draw("#ff9900");
-
-        if (bonusActive) bonusFood.draw("#ff3333");
-
+        if (probability < 0.2) {immunefood.draw("#4488ff"); immuneFoodActive = true;}
+        else if (probability < 0.4) {bonusFood.draw("#ff3333"); bonusActive = true;}
+        else foodInstance.draw();
         document.getElementById("score").textContent = score;
     }
 }
@@ -215,6 +209,7 @@ function foodCollisionCheck() {
     let head = snakeInstance.array[0];
     if (head.x === foodInstance.x && head.y === foodInstance.y) {
         score++;
+            probability = Math.random();
         foodInstance.reset();
         immunefood.reset();
         ateFoodThisFrame = true;
@@ -223,13 +218,15 @@ function foodCollisionCheck() {
 
 function immuneCollisionCheck() {
     let head = snakeInstance.array[0];
-    if (head.x === immunefood.x && head.y === immunefood.y) {
+    if (immuneFoodActive&&head.x === immunefood.x && head.y === immunefood.y) {
         score++;
         isimmune = true;
         immuneCounter = 10 * fps;
+            probability = Math.random();
         foodInstance.reset();
         immunefood.reset();
         ateFoodThisFrame = true;
+        immuneFoodActive = false;
     }
 }
 
@@ -238,7 +235,8 @@ function bonusCollisionCheck() {
     if (bonusActive && head.x === bonusFood.x && head.y === bonusFood.y) {
         score += 3;
         bonusActive = false;
-        nextBonusSpawn = Date.now() + 8000 + Math.random() * 12000;
+            probability = Math.random();
+        bonusFood.reset();
         ateFoodThisFrame = true;
     }
 }
@@ -260,7 +258,8 @@ function endGame(cause) {
     ctx.fillText("score: " + score, w / 2, h / 2 + 40);
     ctx.fillStyle = "#555";
     ctx.fillText("R to restart", w / 2, h / 2 + 70);
-    document.getElementById("highscore-display").textContent = Math.max(score, highscore);
+    highscore = fetchHighScore(playerName);
+    sessionHighscore();
 
     sendScore(cause);
 }
@@ -276,7 +275,8 @@ function restartGame() {
     snakeInstance.create();
     foodInstance.reset();
     bonusActive = false;
-    nextBonusSpawn = Date.now() + 8000 + Math.random() * 12000;
+        immuneFoodActive = false;
+        probability = 1;
     animate();
 }
 
@@ -303,15 +303,26 @@ function startGame() {
     baseFps = fps;
     interval = 1000 / fps;
     startTime = Date.now();
+    sessionhigh = 0;
     then = Date.now();
     document.getElementById("rule_container").style.display = "none";
     document.getElementById("game-container").style.display = "block";
     document.getElementById("score-container").style.display = "block";
     document.getElementById("immunebar").style.display = "block";
     document.getElementById("time_container").style.display = "block";
+    document.getElementById("sessionhigh-container").style.display = "block";
     play();
-    fetchHighScore(playerName);
+    highscore = fetchHighScore(playerName);
 }
+
+ let sessionhigh ;
+
+function sessionHighscore(){
+    
+if(score > sessionhigh){
+    sessionhigh = score;}
+document.getElementById("sessionhigh-display").textContent = sessionhigh;}
+
 
 function sendScore(cause) {
     const duration = Math.floor((Date.now() - startTime) / 1000);
@@ -347,6 +358,7 @@ function sendScore(cause) {
 
 function fetchHighScore(name) {
     // URL encode the name to handle spaces or special characters safely
+    let result;
     const url = `http://127.0.0.1:5000/get_highscore?name=${encodeURIComponent(name)}`;
     
     fetch(url)
@@ -354,9 +366,11 @@ function fetchHighScore(name) {
         .then(data => {
             if (data.status === 'ok') {
                 document.getElementById("highscore-display").textContent = data.highscore;
+                result = data.highscore;
             }
         })
         .catch(error => {
             console.error('Error fetching high score:', error);
         });
+        return result;
 }
