@@ -1,0 +1,23 @@
+# Makefile for LaTeX report
+
+# Main file name (without extension)
+MAIN = latex
+
+# Default target: compile PDF
+all: $(MAIN).pdf
+
+# Rule to build PDF from .tex
+$(MAIN).pdf: $(MAIN).tex
+	pdflatex -interaction=nonstopmode -jobname=$(MAIN) $(MAIN).tex
+	pdflatex -interaction=nonstopmode -jobname=$(MAIN) $(MAIN).tex   # run twice for references
+
+# Clean up auxiliary files
+clean:
+	rm -f $(MAIN).aux $(MAIN).log $(MAIN).out $(MAIN).toc 
+
+# Remove everything including the PDF
+distclean: clean
+	rm -f $(MAIN).pdf
+
+view: $(MAIN).pdf
+	explorer.exe $(MAIN).pdf

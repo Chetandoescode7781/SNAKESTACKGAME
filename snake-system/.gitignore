@@ -4,3 +4,6 @@ __pycache__/
 .env
 history.txt
 history_backup_*.txt
+latex.aux
+latex.log
+latex.pdf
